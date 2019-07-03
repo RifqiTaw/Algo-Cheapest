@@ -1,6 +1,7 @@
 from koneksi import ConDB
 from random import uniform
 import numpy as np
+import time
 import math
 import random
 import matplotlib.pyplot as plt
@@ -14,8 +15,8 @@ class CuckooSearch(object):
         self.hotels = self.db.HotelbyID(32)
 
         self.generasi = 0
-        self.sarang = 10 if sarang == -1 else sarang
-        self.maxGen = 10000 if maxgenerasi == -1 else maxgenerasi
+        self.sarang = 20 if sarang == -1 else sarang
+        self.maxGen = 100 if maxgenerasi == -1 else maxgenerasi
 
         self.dtime = 1 if dtime == -1 else dtime
         self.drating = 1 if drating == -1 else drating
@@ -26,8 +27,8 @@ class CuckooSearch(object):
         self.tmhotelto = self.db.TMHto() if tmhotelto == -1 else tmhotelto
 
         self.cur_solution = self.initialSolution()
-        self.pa = int(0.2*self.sarang)  if pa == -1 else int(pa*self.sarang)
-        # self.best_solution = list(self.cur_solution)
+        print(pa)
+        self.pa = 0.6  if pa == -1 else pa
 
         self.hotel = self.hotels[0] if hotel == -1 else hotel
         self.hotel.dttime = datetime.time(8,0,0)
@@ -37,9 +38,8 @@ class CuckooSearch(object):
         if self.cur_tsp:
             self.currentFitness = self.utility(self.cur_tsp)
             self.cur_fitness = self.utility(self.cur_solution)
-            # self.best_fitness = self.currentFitness
-            # self.best_tsp = list(self.cur_tsp)
-            # self.best_tour = list(self.tour)
+            self.best_fitness = self.currentFitness
+
 
 #    get waktu dari db timematrix
     def tmatrix(self,wisata1,wisata2):
@@ -91,13 +91,18 @@ class CuckooSearch(object):
 
 #   Menghitung waktu berdasarkan durasi
     def fitness(self, sol):
-        ''' Objective value of a solution '''
+        # ubf = 596
+        # lbf = 22084
+        # ubt = 597
+        # lbt = 22752
+        # ub = 77
+        # lb = 29534
         ubf = 596
-        lbf = 22084
+        lbf = 5814
         ubt = 597
-        lbt = 22752
+        lbt = 6093
         ub = 77
-        lb = 29534
+        lb = 9432
         x = sum( [ self.normalisasi(self.tmatrix(sol[i-1],sol[i]),ub,lb) for i in range(1,len(sol)) ] )
         y = len(sol)-1
         try:
@@ -124,10 +129,6 @@ class CuckooSearch(object):
         # y = self.drating*self.fitnessRating(sol)
         # z = self.dtarif*self.fitnessTarif(sol)
         # tot = (x+y+z)/3
-        # print("fitness waktu: ",x)
-        # print("fitness rating: ",y)
-        # print("fitness tarif: ",z)
-        # print("==============")
         return ((self.dtime*self.fitness(sol)) + (self.drating*self.fitnessRating(sol)) + (self.dtarif*self.fitnessTarif(sol)))/3
 
 #   cek konstrain jam buka dan tutup
@@ -180,7 +181,6 @@ class CuckooSearch(object):
                 if accept == True:
                     cur_node = node
                     tsp.append(cur_node)
-                    # x = self.utility(tsp)
             else :
                 break
 
@@ -189,14 +189,11 @@ class CuckooSearch(object):
 
 
 # membangkitkan cukoo
-    # def sarang(self,candidate):
-    #     for i in range(self.numNest):
-    #         nests = initialSolution()
-    #         waktuRute,rute = self.hitungWaktu(self.cur_solution)
-    #         if self.cur_tsp:
-    #             self.currentFitness = self.utility(self.cur_tsp)
-    #             self.cur_fitness = self.utility(self.cur_solution)
-    #     return
+    def sarang(self,candidate,a,b):
+        for i in range(self.numNest-self.pa,self.numNest):
+            nilaifitness[i] = self.fitness(candidate[i])
+            candidate = twoOptMove(candidate,a,b)
+        return candidate
 
 
 ### twoOptMove
@@ -213,8 +210,8 @@ class CuckooSearch(object):
 
     def doubleBridgeMove(self,nest,a,b,c,d):
     	node = nest
-    	self.swap(node,a,c)
-    	self.swap(node,b,d)
+    	self.swap(node,a,b)
+    	self.swap(node,c,d)
     	return (node)
 
     def cek_fitness(self,candidate):
@@ -241,68 +238,79 @@ class CuckooSearch(object):
 
 
     def mainCuckoo(self):
+        nest = []
+        fitness = []
+        for i in range(self.sarang):
 
-        # for i in range(self.sarang):
-        #     self.cur_solution = self.initialSolution()
-        #     self.cur_tsp,self.tour = self.hitungWaktu(self.cur_solution)
-        #     if self.cur_tsp:
-        #         self.currentFitness = self.utility(self.cur_tsp)
-        #         self.cur_fitness = self.utility(self.cur_solution)
-            # nest = list(self.cur_solution)
+            self.cur_solution = self.initialSolution()
+            # print("initialSolution : ",self.cur_solution)
+            # print("solution: ",self.cur_solution)
+            # nest.append(self.cur_solution)
+            # print("nest : ",nest)
+            self.cur_tsp,self.tour = self.hitungWaktu(self.cur_solution)
+            if self.cur_tsp:
+                self.currentFitness = self.utility(self.cur_tsp)
+                self.cur_fitness = self.utility(self.cur_solution)
+
+        #     # nest = list(self.cur_solution)
             # n = len(nest)
             # dimension = len(self.cur_solution[0])
             # k = np.array([np.random.random([len(self.cur_solution)])<self.pa],dtype=int)
             # stepsize = np.multiply(np.subtract(self))
 
+
+
         if self.cur_tsp:
         #### algoritma  cuckoo ####
             while self.generasi <= self.maxGen:
-                x = 0
-                nests = []
+                # x = 0
+                # while (x <= self.sarang):
+                candidate = list(self.cur_solution)
+                candidate_tsp,candidate_tour = self.hitungWaktu(candidate)
+                candidate_fitness = self.utility(candidate_tsp)
+                # if (self.currentFitness < self.pa):
+                #     self.cur_solution = self.initialSolution()
+                # else:
+                cuckoofit = self.levy_flight() * candidate_fitness + candidate_fitness
+                a = random.randint(0,len(candidate)-1)
+                b = random.randint(0,len(candidate)-1)
+                c = random.randint(0,len(candidate)-1)
+                d = random.randint(0,len(candidate)-1)
+                for i in range(len(candidate)-1):
+                    if a > b:
+                        a,b = b,a
+                    if b > c:
+                        b,c = c,b
+                    if c > d:
+                        c,d = d,c
 
-                while (x <= self.sarang):
-                    candidate = list(self.cur_solution)
-                    candidate_tsp,candidate_tour = self.hitungWaktu(candidate)
-                    candidate_fitness = self.utility(candidate_tsp)
-                    cuckoofit = self.levy_flight() * candidate_fitness + candidate_fitness
-                    # print("candidate: ",candidate)
-                    a = random.randint(0,len(candidate)-1)
-                    b = random.randint(a,len(candidate)-1)
-                    c = random.randint(b,len(candidate)-1)
-                    d = random.randint(c,len(candidate)-1)
-                    for i in range(0,len(candidate)):
-                        if a>b :
-                            a,b = b,a
-                        if b>c :
-                            b,c = c,b
-                        if c>d :
-                            c,d = d,c
+
                 #m#masuk ke dalam pengecekan cucko
 
-                    if  (len(candidate)<11) and (cuckoofit < candidate_fitness):
+                if  (len(candidate)<11) and (cuckoofit > candidate_fitness):
                         # candidate = self.twoOptMove(candidate,a,b)
-                        candidate[a:(a+b)] = reversed(candidate[a:(a+b)])
+                    # candidate[b:(b+a)] = reversed(candidate[b:(b+a)])
+                    cuckoofit = self.twoOptMove(candidate,a,b)
                         # print("candidate two opt move: ",candidate)
-                        self.cek_fitness(candidate)
-                    elif (len(candidate)>= 11) and (cuckoofit < candidate_fitness):
-                        candidate = self.doubleBridgeMove(candidate,a,b,c,d)
-                        # print("candidate doubleBridgeMove: ",candidate)
-                        self.cek_fitness(candidate)
+                    self.cek_fitness(cuckoofit)
+                    if (self.currentFitness < self.pa):
+                        self.cur_solution =  self.initialSolution()
 
+                elif (len(candidate)>= 11) and (cuckoofit > candidate_fitness):
+                    # candidate[b:(b+a)] = reversed(candidate[b:(b+a)])
+                    # print("candidate a:",candidate[b:(b+a)])
+                    # candidate[d:(d+c)] = reversed(candidate[d:(d+c)])
+                    # print("candidate d:",candidate[d:(d+c)])
+                    cuckoofit = self.doubleBridgeMove(candidate,a,b,c,d)
+                    self.cek_fitness(cuckoofit)
+                    if (self.currentFitness < self.pa):
+                        self.cur_solution =  self.initialSolution()
 
-
-                        ##### masukin nilai pa
-                    # randomNextIndex = random.randint(0,self.sarang-1)
-                    # candidate_baru = list(candidate)
-                    # print("candidate baru: ",candidate_baru)
-                    # if(candidate[randomNextIndex]>candidate[1]):
-                    #     candidate[randomNextIndex] = candidate
-                    # for i in range(self.sarang-self.pa,self.sarang):
-                    #     candidate[i] = self.twoOptMove(candidate[i],a,b)
-                    x += 1
-                    self.generasi += 1
-
-
+                # x += 1
+                self.generasi += 1
+                # print(self.currentFitness)
+                # print(self.tour)
+                # print(self.cur_tsp)
             return self.tour,self.cur_tsp
 
 #   Fungsi TSP untuk mereturn hasil tsp dalam 1 hari dan sisa tour untuk TSP hari selanjutnya
@@ -326,5 +334,4 @@ class CuckooSearch(object):
             if jam > 23:
                 jam -= 24
             self.endNode.dttime = datetime.time(jam,menit,detik)
-            print(self.currentFitness)
         return tsp,rest

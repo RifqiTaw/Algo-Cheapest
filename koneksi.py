@@ -44,8 +44,8 @@ class ConDB:
             tarif = k[21]
             jbuka,jtutup = self.getJadwal(_id)
             buka = datetime.time(jbuka.seconds//3600,(jbuka.seconds//60)%60,0)
-            # tutup = datetime.time(jtutup.seconds//3600,(jtutup.seconds//60)%60,0)
-            tutup = datetime.time(19,0,0)
+            tutup = datetime.time(jtutup.seconds//3600,(jtutup.seconds//60)%60,0)
+            # tutup = datetime.time(18,0,0)
             node = Node(_id,nama,lat,lng,time,rating,tarif,jenis,buka,tutup)
             tour.append(node)
         return tour

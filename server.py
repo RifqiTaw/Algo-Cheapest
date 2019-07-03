@@ -6,9 +6,9 @@ from koneksi import ConDB
 
 app = Flask(__name__)
 
-@app.route('/')
-def index():
-    return "coba"
+# @app.route('/')
+# def index():
+#     return "coba"
 @app.route('/cuckoo/<strs>')
 def dashboard(strs):
     template = jinja2.Template('{{test}}')

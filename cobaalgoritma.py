@@ -71,15 +71,21 @@ def doubleBridgeMove(self,candidate):
     d = candidate[q[0]+1:q[1]+1]
     e = candidate[q[3]+1]
 
-    a1 = a.tolist()
-    b1 = b.tolist()
-    c1 = c.tolist()
-    d1 = d.tolist()
-    e1 = e.tolist()
-
+    candidate = reversed(candidate[a])
     hasil = np.array(a1+b1+c1+d1+e1)
 
     return print(hasil)
+
+def cek_fitness(self,candidate):
+    candidate_tsp,candidate_tour = self.hitungWaktu(candidate)
+    fitness_baru = self.utility(candidate_tsp)
+    if fitness < self.currentFitness:
+        self.currentFitness = fitness_baru
+        self.cur_solution = candidate
+        self.cur_tsp = list(candidate_tsp)
+        self.tour = candidate_tour
+
+
     # l = len(hasil)
     # total = 0
     #
@@ -98,5 +104,9 @@ def doubleBridgeMove(self,candidate):
     #     if c == d:
     #         d = random.randint(c,20)
 
+def cek_fraksi(self,candidate,pa):
+    acak = np.random.rand()
 
-print( a,b,c,d)
+    if acak >= pa
+        k_pa = self.currentFitness
+        f_value = f_best[k_pa].tolist()
