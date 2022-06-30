@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "flask": "^0.2.10",
+    "jinja2": "^0.0.1",
+    "matplotlib": "^1.0.0",
+    "numpy": "^0.0.1",
+    "pymysql": "^1.0.0"
+  }
+}

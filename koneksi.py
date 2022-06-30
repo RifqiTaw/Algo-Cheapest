@@ -1,14 +1,22 @@
 from node import Node
 from timematrix import TimeMatrix
 from tourmanager import TourManager
-import pymysql as mdb
+import pymysql 
 import datetime
 
 class ConDB:
 
     def connect(self):
-        con = mdb.connect('localhost', 'root', '', 'rekomendasi_wisata')
-        return con
+        # con = pymysql.connect('localhost', 'root', '', 'rekomendasi_wisata')
+        # return con
+        conn = pymysql.connect(
+            host = '127.0.0.1',
+            port = 3306,
+            user = 'root',
+            passwd = '',
+            db = 'rekomendasi_wisata'
+        )
+        return conn
 
     def select(self,table):
         con = self.connect()
@@ -28,7 +36,7 @@ class ConDB:
         con.close()
         return jadwal[2],jadwal[3]
 
-    def WisatabyID(self,idwisata):
+    def WisatabyID(self,idwisata): # Mendapatkan Id wisata dialam database tersedia
         tour = []
         con = self.connect()
         cur = con.cursor()
@@ -44,13 +52,13 @@ class ConDB:
             tarif = k[21]
             jbuka,jtutup = self.getJadwal(_id)
             buka = datetime.time(jbuka.seconds//3600,(jbuka.seconds//60)%60,0)
-            tutup = datetime.time(jtutup.seconds//3600,(jtutup.seconds//60)%60,0)
-            # tutup = datetime.time(18,0,0)
+            #tutup = datetime.time(jtutup.seconds//3600,(jtutup.seconds//60)%60,0)
+            tutup = datetime.time(19,0,0)
             node = Node(_id,nama,lat,lng,time,rating,tarif,jenis,buka,tutup)
             tour.append(node)
         return tour
 
-    def HotelbyID(self,idHotel):
+    def HotelbyID(self,idHotel): #Mendapatkan Id hotel dalam database tersedia
         con = self.connect()
         cur = con.cursor()
         sql = """SELECT * FROM posts WHERE post_id = "%s" """%(str(idHotel))
@@ -64,7 +72,7 @@ class ConDB:
         htl = Node(_id,nama,lat,lng,time,rating,tarif,jenis,buka,tutup)
         return htl
 
-    def TimeMatrixbyID(self,idmatrix):
+    def TimeMatrixbyID(self,idmatrix): # Waktu tempuh wisata a ke wisata b
         timematrix = []
         con = self.connect()
         cur = con.cursor()
@@ -78,7 +86,7 @@ class ConDB:
             timematrix.append(tm)
         return timematrix
 
-    def TMHfrombyID(self,idHotel,idmatrix):
+    def TMHfrombyID(self,idHotel,idmatrix): # Waktu Tempuh berangkat hotel
         timematrix = []
         con = self.connect()
         cur = con.cursor()
@@ -92,7 +100,7 @@ class ConDB:
             timematrix.append(tm)
         return timematrix
 
-    def TMHtobyID(self,idHotel,idmatrix):
+    def TMHtobyID(self,idHotel,idmatrix): # waktu tempuh Pulang hotel
         timematrix = []
         con = self.connect()
         cur = con.cursor()
@@ -102,6 +110,6 @@ class ConDB:
         con.close()
         for m in matrix:
             _id,fromto,idtempat,hari,time = m[0],m[1],m[2],None,m[4]
-            tm = TimeMatrix(_id,fromto,idtempat,hari,time)
+            tm = TimeMatrix(_id,idtempat,fromto,hari,time)
             timematrix.append(tm)
         return timematrix

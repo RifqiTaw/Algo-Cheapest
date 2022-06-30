@@ -5,11 +5,10 @@ from flask import Flask, render_template
 from koneksi import ConDB
 
 app = Flask(__name__)
-
-# @app.route('/')
-# def index():
-#     return "coba"
-@app.route('/cuckoo/<strs>')
+@app.route('/')
+def index():
+    return "coba"
+@app.route('/cheapest/<strs>')
 def dashboard(strs):
     template = jinja2.Template('{{test}}')
     t = str(strs)
@@ -22,6 +21,8 @@ def dashboard(strs):
     dwaktu = float(t_['degree'][0])
     dtarif = float(t_['degree'][2])
     drating = float(t_['degree'][1])
+    
+    # kunjungan = int(t_['visitingTime'][0])
     tspperday,waktuDatang = run.main(tourid,idhotel,dwaktu,drating,dtarif)
     dictionary = {}
     dictionary['day1'] = {}
@@ -34,6 +35,7 @@ def dashboard(strs):
     dictionary['day2']['waktu'] = waktuDatang[1]
     dictionary['day3']['waktu'] = waktuDatang[2]
     print (dictionary)
+
 #    print(t_['DOI'])
 #    json dumps ngerubah dictionary jadi json ntar hasil algoritma dictionari terus jadiin json
     return render_template(template,test=json.dumps(dictionary))

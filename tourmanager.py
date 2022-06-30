@@ -9,3 +9,4 @@ class TourManager:
 
    def numberOfNodes(self):
       return len(self.destinationNodes)
+
